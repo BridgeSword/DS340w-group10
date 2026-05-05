@@ -39,6 +39,7 @@ def load_outputs() -> tuple[pd.DataFrame, pd.DataFrame, dict[str, object]]:
 
 
 summary_df, stats_df, subset_summary = load_outputs()
+summary_df["response_filter"] = summary_df["response"].fillna("unknown")
 
 st.markdown(
     """
@@ -58,7 +59,7 @@ st.markdown(
 st.title("Loblaw Bio Immune Trial Dashboard")
 
 filtered_trial = summary_df.query(
-    "condition == 'melanoma' and treatment == 'miraclib' and sample_type == 'PBMC'"
+    "condition == 'melanoma' and treatment == 'miraclib' and sample_type == 'PBMC' and response in ['yes', 'no']"
 )
 
 metric_cols = st.columns(4)
@@ -91,8 +92,8 @@ with st.sidebar:
     )
     responses = st.multiselect(
         "Response",
-        sorted(summary_df["response"].unique()),
-        default=sorted(summary_df["response"].unique()),
+        sorted(summary_df["response_filter"].unique()),
+        default=sorted(summary_df["response_filter"].unique()),
     )
     time_points = st.multiselect(
         "Days from treatment start",
@@ -105,7 +106,7 @@ filtered = summary_df[
     & summary_df["condition"].isin(conditions)
     & summary_df["sample_type"].isin(sample_types)
     & summary_df["treatment"].isin(treatments)
-    & summary_df["response"].isin(responses)
+    & summary_df["response_filter"].isin(responses)
     & summary_df["time_from_treatment_start"].isin(time_points)
 ].copy()
 
